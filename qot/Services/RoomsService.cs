@@ -1,6 +1,6 @@
 ﻿using qot.Controllers;
 using qot.Models;
-using System;
+using System.Collections.Concurrent;
 
 namespace qot.Services
 {
@@ -9,7 +9,7 @@ namespace qot.Services
 
         private readonly int maxUserNameLength = 15, minUserNameLength = 2;
         private readonly Random _random = new();
-        private readonly Dictionary<string, Room> _rooms = new();
+        private readonly ConcurrentDictionary<string, Room> _rooms = new();
 
         public Room CreateRoom(RoomRequest request)
         {
@@ -25,7 +25,7 @@ namespace qot.Services
                 RoomCode = roomCode
             };
             room.Users.Add(new User() { Alias = request.Username });
-            _rooms.Add(roomCode, room);
+            _rooms[roomCode] = room;
             logger.LogInformation($"Room '{roomCode}' added to server by User '{request.Username}'.");
 
             return room;
