@@ -69,6 +69,16 @@ namespace qot.Services
             throw new KeyNotFoundException($"Room with code '{roomCode}' not found.");
         }
 
+        public void CleanupEmptyRooms()
+        {
+            var emptyRooms = _rooms.Where(r => r.Value.Users.Count == 0).Select(r => r.Key).ToList();
+            foreach (var roomCode in emptyRooms)
+            {
+                _rooms.TryRemove(roomCode, out _);
+                logger.LogInformation($"Removed empty room '{roomCode}'");
+            }
+        }
+
         private string GenerateRoomCode()
         {
             const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
