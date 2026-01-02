@@ -1,6 +1,7 @@
 ﻿using qot.Controllers;
 using qot.Models;
 using System.Collections.Concurrent;
+using static qot.Controllers.RoomsController;
 
 namespace qot.Services
 {
@@ -43,7 +44,11 @@ namespace qot.Services
                 Room room = GetRoom(request.RoomCode);
                 if (room.Users.Count >= room.MaxCapacity)
                 {
-                    throw new InvalidOperationException($"Room '{request.RoomCode}' is at full capacity.");
+                    throw new InvalidOperationException($"Room '{request.RoomCode}' is full.");
+                }
+                if (room.Users.Any(u => u.Alias.Equals(request.Username, StringComparison.OrdinalIgnoreCase)))
+                {
+                    throw new InvalidOperationException($"Username '{request.Username}' is already taken in Room '{request.RoomCode}'.");
                 }
                 room.Users.Add(new User() { Alias = request.Username });
                 logger.LogInformation($"User '{request.Username}' joined Room '{request.RoomCode}'.");
@@ -51,7 +56,7 @@ namespace qot.Services
             }
             catch (KeyNotFoundException)
             {
-                throw new ArgumentException($"Room with code '{request.RoomCode}' does not exist.");
+                throw new KeyNotFoundException($"Room with code '{request.RoomCode}' does not exist.");
             }
         }
 

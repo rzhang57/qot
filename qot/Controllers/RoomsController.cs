@@ -21,7 +21,6 @@ namespace qot.Controllers
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Error creating room");
                 return BadRequest(ex.Message);
             }
         }
@@ -34,9 +33,22 @@ namespace qot.Controllers
                 Room room = roomsService.JoinRoom(request);
                 return Ok(room);
             }
-            catch (Exception ex)
+            catch (ArgumentException ex)
             {
                 return BadRequest(ex.Message);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error joining room");
+                return StatusCode(500, "Internal server error");
             }
         }
     }
