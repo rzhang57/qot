@@ -1,14 +1,13 @@
 ﻿using qot.Controllers;
 using qot.Models;
 using System.Collections.Concurrent;
-using static qot.Controllers.RoomsController;
 
 namespace qot.Services
 {
     public class RoomsService(ILogger<RoomsService> logger)
     {
 
-        private readonly int maxUserNameLength = 15, minUserNameLength = 2;
+        private readonly int maxUserNameLength = 15, minUserNameLength = 2, minimumLifeTime = 8;
         private readonly Random _random = new();
         private readonly ConcurrentDictionary<string, Room> _rooms = new();
 
@@ -71,7 +70,10 @@ namespace qot.Services
 
         public void CleanupEmptyRooms()
         {
-            var emptyRooms = _rooms.Where(r => r.Value.Users.Count == 0).Select(r => r.Key).ToList();
+            var emptyRooms = _rooms
+                .Where(r => r.Value.Users.Count == 0 && DateTime.UtcNow.CompareTo(r.Value.CreatedAt.AddHours(minimumLifeTime)) > 0)
+                .Select(r => r.Key).ToList();
+
             foreach (var roomCode in emptyRooms)
             {
                 _rooms.TryRemove(roomCode, out _);
