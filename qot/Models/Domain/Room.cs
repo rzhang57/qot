@@ -1,4 +1,4 @@
-﻿namespace qot.Models
+﻿namespace qot.Models.Domain
 {
     public class Room
     {

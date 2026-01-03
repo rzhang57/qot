@@ -1,5 +1,5 @@
-﻿using qot.Controllers;
-using qot.Models;
+﻿using qot.Models.DTO;
+using qot.Models.Domain;
 using System.Collections.Concurrent;
 
 namespace qot.Services
@@ -15,7 +15,7 @@ namespace qot.Services
         {
             string roomCode = GenerateRoomCode();
 
-            if (IsValidUsername(request.Username))
+            if (!IsValidUsername(request.Username))
             {
                 throw new ArgumentException($"Username {request.Username} invalid. Usernames must be at least {minUserNameLength} characters long and at most {maxUserNameLength} characters long.");
             }

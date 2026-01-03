@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using qot.Models;
+using qot.Models.DTO;
+using qot.Models.Domain;
 using qot.Services;
 
 namespace qot.Controllers
@@ -21,7 +22,7 @@ namespace qot.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(new ErrorResponse(ex.Message));
             }
         }
 
@@ -35,15 +36,15 @@ namespace qot.Controllers
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(new ErrorResponse(ex.Message));
             }
             catch (KeyNotFoundException ex)
             {
-                return NotFound(ex.Message);
+                return NotFound(new ErrorResponse(ex.Message));
             }
             catch (InvalidOperationException ex)
             {
-                return Conflict(ex.Message);
+                return Conflict(new ErrorResponse(ex.Message));
             }
             catch (Exception ex)
             {
@@ -52,7 +53,4 @@ namespace qot.Controllers
             }
         }
     }
-
-    public record RoomRequest(string Username);
-    public record JoinRoomRequest(string Username, string RoomCode);
 }
