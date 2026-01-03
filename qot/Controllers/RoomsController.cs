@@ -25,32 +25,5 @@ namespace qot.Controllers
                 return BadRequest(new ErrorResponse(ex.Message));
             }
         }
-
-        //[HttpPost("join")]
-        //public IActionResult PostWithId([FromBody] JoinRoomRequest request)
-        //{
-        //    try
-        //    {
-        //        Room room = roomsService.JoinRoom(request);
-        //        return Ok(room);
-        //    }
-        //    catch (ArgumentException ex)
-        //    {
-        //        return BadRequest(new ErrorResponse(ex.Message));
-        //    }
-        //    catch (KeyNotFoundException ex)
-        //    {
-        //        return NotFound(new ErrorResponse(ex.Message));
-        //    }
-        //    catch (InvalidOperationException ex)
-        //    {
-        //        return Conflict(new ErrorResponse(ex.Message));
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        logger.LogError(ex, "Error joining room");
-        //        return StatusCode(500, "Internal server error");
-        //    }
-        //}
     }
 }
