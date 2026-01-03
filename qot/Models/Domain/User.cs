@@ -2,6 +2,6 @@
 {
     public class User
     {
-        public string Alias { get; set; }
+        public required string Alias { get; set; }
     }
 }

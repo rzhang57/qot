@@ -10,53 +10,44 @@ namespace qot.Services
         private readonly int maxUserNameLength = 15, minUserNameLength = 2, minimumLifeTime = 8;
         private readonly Random _random = new();
         private readonly ConcurrentDictionary<string, Room> _rooms = new();
+        private readonly ConcurrentDictionary<string, string> _connectionToRoom = new(); // connectionId → roomCode
 
-        public Room CreateRoom(RoomRequest request)
+        public Room CreateRoom()
         {
             string roomCode = GenerateRoomCode();
-
-            if (!IsValidUsername(request.Username))
-            {
-                throw new ArgumentException($"Username {request.Username} invalid. Usernames must be at least {minUserNameLength} characters long and at most {maxUserNameLength} characters long.");
-            }
 
             var room = new Room()
             {
                 RoomCode = roomCode
             };
-            room.Users.Add(new User() { Alias = request.Username });
             _rooms[roomCode] = room;
-            logger.LogInformation($"Room '{roomCode}' added to server by User '{request.Username}'.");
+            logger.LogInformation($"Room '{roomCode}' added to server.");
 
             return room;
         }
 
-        public Room JoinRoom(JoinRoomRequest request)
+        public Room JoinRoom(JoinRoomRequest request, string connectionId)
         {
             if (!IsValidUsername(request.Username))
             {
                 throw new ArgumentException($"Username {request.Username} invalid. Usernames must be at least {minUserNameLength} characters long and at most {maxUserNameLength} characters long.");
             }
 
-            try
+            Room room = GetRoom(request.RoomCode);
+
+            if (room.Users.Count >= room.MaxCapacity)
             {
-                Room room = GetRoom(request.RoomCode);
-                if (room.Users.Count >= room.MaxCapacity)
-                {
-                    throw new InvalidOperationException($"Room '{request.RoomCode}' is full.");
-                }
-                if (room.Users.Any(u => u.Alias.Equals(request.Username, StringComparison.OrdinalIgnoreCase)))
-                {
-                    throw new InvalidOperationException($"Username '{request.Username}' is already taken in Room '{request.RoomCode}'.");
-                }
-                room.Users.Add(new User() { Alias = request.Username });
-                logger.LogInformation($"User '{request.Username}' joined Room '{request.RoomCode}'.");
-                return room;
+                throw new InvalidOperationException($"Room '{request.RoomCode}' is full.");
             }
-            catch (KeyNotFoundException)
+            if (room.Users.Any(p => p.Value.Alias.Equals(request.Username, StringComparison.OrdinalIgnoreCase) && !p.Key.Equals(connectionId)))
             {
-                throw new KeyNotFoundException($"Room with code '{request.RoomCode}' does not exist.");
+                throw new InvalidOperationException($"Username '{request.Username}' is already taken in Room '{request.RoomCode}'.");
             }
+
+            room.Users.AddOrUpdate(connectionId, _ => new User() { Alias = request.Username }, (_, __) => new User() { Alias = request.Username });
+            _connectionToRoom[connectionId] = request.RoomCode;
+
+            return room;
         }
 
         public Room GetRoom(string roomCode)
@@ -66,6 +57,34 @@ namespace qot.Services
                 return room;
             }
             throw new KeyNotFoundException($"Room with code '{roomCode}' not found.");
+        }
+
+        public string? GetRoomCodeByConnectionId(string connectionId)
+        {
+            if (_connectionToRoom.TryGetValue(connectionId, out var roomCode))
+            {
+                return roomCode;
+            }
+            return null;
+        }
+
+        public User GetUserByConnectionId(string roomCode, string connectionId)
+        {
+            var room = GetRoom(roomCode);
+            if (room.Users.TryGetValue(connectionId, out var user))
+            {
+                return user;
+            }
+            throw new KeyNotFoundException($"User with connection ID '{connectionId}' not found.");
+        }
+
+        public void RemoveUser(string roomCode, string connectionId)
+        {
+            if (_rooms.TryGetValue(roomCode, out var room))
+            {
+                room.Users.TryRemove(connectionId, out _);
+                logger.LogInformation($"User with connection '{connectionId}' removed from room '{roomCode}'.");
+            }
         }
 
         public void CleanupEmptyRooms()
