@@ -16,7 +16,6 @@ namespace qot.Controllers
             {
                 Room room = roomsService.CreateRoom();
                 logger.LogInformation($"Created room {room.RoomCode}");
-                // create socket connection here
 
                 return Ok(room);
             }
