@@ -3,6 +3,9 @@ import {useState} from "react";
 import {useNavigate, useParams} from "react-router-dom";
 import {hubClient} from "../services/HubClient.ts";
 
+const USERNAME_MINLENGTH = 2;
+const USERNAME_MAXLENGTH = 15;
+
 export default function RoomEntrance() {
     const [username, setUsername] = useState('');
     const [error, setError] = useState('');
@@ -54,16 +57,16 @@ export default function RoomEntrance() {
                             placeholder="nickname"
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
-                            maxLength={15}
+                            maxLength={USERNAME_MAXLENGTH}
                             autoFocus
                         />
 
                         <button
                             onClick={handleJoinRoom}
-                            disabled={username.length < 2}
+                            disabled={username.length <= USERNAME_MINLENGTH}
                             className={`
                                 flex shrink-0 items-center justify-center w-12 h-12 rounded-full transition-all duration-500 border
-                                ${username.length > 2
+                                ${username.length >= USERNAME_MINLENGTH
                                 ? `${glassIridescent} text-zinc-800 scale-102 rotate-0 shadow-sm cursor-pointer`
                                 : 'bg-zinc-100/50 border-transparent text-zinc-300 scale-90 cursor-not-allowed'}
                             `}
