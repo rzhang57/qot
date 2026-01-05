@@ -19,7 +19,7 @@ export default function RoomEntrance() {
         } catch (err: any) {
             setError('Failed to join room. Please try again.');
         }
-    }
+}
 
     return (
         <div
@@ -81,7 +81,7 @@ export default function RoomEntrance() {
                         className="text-zinc-400 text-xs font-medium hover:text-black transition-colors duration-300 cursor-pointer"
                         onClick={() => navigate('/')}
                     >
-                        go back
+                        home
                     </button>
                 </>
                 <div

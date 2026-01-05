@@ -54,7 +54,11 @@ function Landing() {
             if (hideTimer) window.clearTimeout(hideTimer);
             if (clearTimer) window.clearTimeout(clearTimer);
         };
-    }, [error]);
+    }, [error, view]);
+
+    useEffect(() => {
+        setError('');
+    }, [view]);
 
 
     const handleCreateRoom = async () => {
