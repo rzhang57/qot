@@ -24,5 +24,19 @@ namespace qot.Controllers
                 return BadRequest(new ErrorResponse(ex.Message));
             }
         }
+        
+        [HttpGet]
+        public IActionResult FindRoom([FromQuery] string roomCode)
+        {
+            try
+            {
+                Room room = roomsService.GetRoom(roomCode);
+                return Ok(room);
+            }
+            catch (Exception ex)
+            {
+                return NotFound(new ErrorResponse(ex.Message));
+            }
+        }
     }
 }

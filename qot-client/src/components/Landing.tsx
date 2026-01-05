@@ -1,36 +1,86 @@
-import { useState } from 'react';
+import {useEffect, useState} from 'react';
 import {type Room, RoomsClient} from "../services/RoomsClient.ts";
+import {useNavigate} from "react-router-dom";
+
+const glassBase = "relative backdrop-blur-xl border shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden transition-all duration-500 ease-out";
+const glassInactive = "bg-white/30 border-white/40";
+const glassIridescent = "bg-gradient-to-r from-rose-300/20 via-fuchsia-300/20 to-indigo-300/20 border-white/50 animate-gradient bg-[length:200%_200%]";
+
+const AmbientBackground = () => (
+    <>
+        <div className="absolute top-[-20%] left-[-10%] w-[50vw] h-[50vw] bg-purple-200/20 rounded-full blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-[-20%] right-[-10%] w-[50vw] h-[50vw] bg-blue-200/20 rounded-full blur-[120px] pointer-events-none" />
+    </>
+);
 
 function Landing() {
     const [view, setView] = useState<'home' | 'join'>('home');
     const [roomCode, setRoomCode] = useState('');
+    const [error, setError] = useState<string>('');
+
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        let showTimer: number | undefined;
+        let hideTimer: number | undefined;
+        let clearTimer: number | undefined;
+
+        const getEl = () => document.getElementById('landing-error');
+
+        if (error !== '') {
+            showTimer = window.setTimeout(() => {
+                const node = getEl();
+                if (node) {
+                    node.classList.remove('opacity-0');
+                    node.classList.add('opacity-100');
+                }
+            }, 10);
+
+            hideTimer = window.setTimeout(() => {
+                const node = getEl();
+                if (node) {
+                    node.classList.remove('opacity-100');
+                    node.classList.add('opacity-0');
+                }
+            }, 4500);
+
+            clearTimer = window.setTimeout(() => {
+                setError('');
+            }, 5000);
+        }
+
+        return () => {
+            if (showTimer) window.clearTimeout(showTimer);
+            if (hideTimer) window.clearTimeout(hideTimer);
+            if (clearTimer) window.clearTimeout(clearTimer);
+        };
+    }, [error]);
+
 
     const handleCreateRoom = async () => {
         try {
             const room: Room = await RoomsClient.createRoom();
-            console.log('Created room:', room.roomCode);
+            navigate(`/rooms/${room.roomCode}`);
         } catch (error) {
+            setError('Something went wrong. Please try again later.');
             console.error('Error creating room:', error);
         }
-
     };
 
-    const handleJoinRoom = () => {
+    const handleJoinRoom = async () => {
         if (roomCode.length === 6) {
-            console.log('Joining room:', roomCode);
+            try {
+                await RoomsClient.findRoom(roomCode);
+
+                console.log('Room found, navigating to room:', roomCode);
+                navigate(`/rooms/${roomCode}`);
+            }
+            catch (error) {
+                setError('Room not found. Check your room code and try again.');
+                console.error('Error joining room:', error);
+            }
         }
     };
-
-    const AmbientBackground = () => (
-        <>
-            <div className="absolute top-[-20%] left-[-10%] w-[50vw] h-[50vw] bg-purple-200/20 rounded-full blur-[120px] pointer-events-none" />
-            <div className="absolute bottom-[-20%] right-[-10%] w-[50vw] h-[50vw] bg-blue-200/20 rounded-full blur-[120px] pointer-events-none" />
-        </>
-    );
-
-    const glassBase = "relative backdrop-blur-xl border shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden transition-all duration-500 ease-out";
-    const glassInactive = "bg-white/30 border-white/40";
-    const glassIridescent = "bg-gradient-to-r from-rose-300/20 via-fuchsia-300/20 to-indigo-300/20 border-white/50 animate-gradient bg-[length:200%_200%]";
 
     return (
         <div className="relative flex flex-col items-center justify-center min-h-screen bg-[#FAFAFA] overflow-hidden selection:bg-black selection:text-white">
@@ -47,7 +97,8 @@ function Landing() {
 
             <AmbientBackground />
 
-            <div className="z-10 flex flex-col items-center gap-2 animate-in fade-in zoom-in duration-700">
+            <div
+                className="z-10 flex flex-col items-center gap-2 animate-in fade-in zoom-in duration-700 transition-all duration-500">
                 {view === 'join' ? (
                     <>
                         <div
@@ -109,11 +160,18 @@ function Landing() {
                         >
                             or join an existing room
                         </button>
+
                     </>
                 )}
+                <div className={`transition-all duration-500 overflow-hidden ${error ? 'h-6 opacity-100' : 'h-0 opacity-0'}`}>
+                    <div className="text-red-500 text-xs font-medium">
+                        {error}
+                    </div>
+                </div>
             </div>
         </div>
     );
 }
 
 export default Landing;
+export {glassBase, glassInactive, glassIridescent, AmbientBackground};

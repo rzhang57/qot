@@ -17,6 +17,16 @@ async function createRoom(): Promise<Room> {
     return await restClient.post<Room>('/api/rooms');
 }
 
+async function findRoom(roomCode: string): Promise<Room> {
+    const query = roomCode ? `?roomCode=${roomCode}` : '';
+    try {
+        return await restClient.get<Room>(`/api/rooms${query}`);
+    } catch (error) {
+        throw new Error('Room not found');
+    }
+}
+
 export const RoomsClient = {
-    createRoom
+    createRoom,
+    findRoom
 }
