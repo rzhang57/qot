@@ -76,11 +76,11 @@ function Landing() {
             try {
                 await RoomsClient.findRoom(roomCode);
 
-                console.log('Room found, navigating to room:', roomCode);
+                console.log('RoomEditor found, navigating to room:', roomCode);
                 navigate(`/rooms/${roomCode}`);
             }
             catch (error) {
-                setError('Room not found. Check your room code and try again.');
+                setError('RoomEditor not found. Check your room code and try again.');
                 console.error('Error joining room:', error);
             }
         }

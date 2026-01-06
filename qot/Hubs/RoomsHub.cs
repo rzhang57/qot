@@ -10,22 +10,13 @@ namespace qot.Hubs
         
         public async Task JoinRoom(string roomCode, string username)
         {
-            try
-            {
-                roomsService.JoinRoom(new JoinRoomRequest(username, roomCode), Context.ConnectionId);
-                await Groups.AddToGroupAsync(Context.ConnectionId, roomCode);
+            roomsService.JoinRoom(new JoinRoomRequest(username, roomCode), Context.ConnectionId);
+            await Groups.AddToGroupAsync(Context.ConnectionId, roomCode);
 
-                var room = roomsService.GetRoom(roomCode);
-                await Clients.Group(roomCode).SendAsync("UserJoined", username, room.Users.Count);
+            var room = roomsService.GetRoom(roomCode);
+            await Clients.Group(roomCode).SendAsync("UserJoined", username, room.Users.Count);
 
-                logger.LogInformation("User {username} joined room {roomCode}", username, roomCode);
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "Error joining room");
-                await Clients.Caller.SendAsync("JoinError", ex.Message);
-                return;
-            }
+            logger.LogInformation("User {username} joined room {roomCode}", username, roomCode);
         }
 
         public async Task SendMarkdownUpdate(string roomCode, string content)

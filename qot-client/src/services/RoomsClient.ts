@@ -22,7 +22,7 @@ async function findRoom(roomCode: string): Promise<Room> {
     try {
         return await restClient.get<Room>(`/api/rooms${query}`);
     } catch (error) {
-        throw new Error('Room not found');
+        throw new Error('RoomEditor not found');
     }
 }
 

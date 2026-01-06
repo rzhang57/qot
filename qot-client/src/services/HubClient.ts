@@ -37,6 +37,10 @@ class HubClient {
     onUserLeft(callback: (username: string) => void) {
         this.connection.on('UserLeft', callback);
     }
+
+    onMarkdownUpdated(callback: (markdownContent: string) => void) {
+        this.connection.on('MarkdownUpdated', callback);
+    }
 }
 
 export const hubClient = new HubClient();

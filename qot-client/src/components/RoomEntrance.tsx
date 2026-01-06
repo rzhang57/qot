@@ -1,12 +1,16 @@
 import {AmbientBackground, glassBase, glassInactive, glassIridescent} from "./Landing.tsx";
-import {useState} from "react";
 import {useNavigate, useParams} from "react-router-dom";
+import {useState} from "react";
 import {hubClient} from "../services/HubClient.ts";
 
 const USERNAME_MINLENGTH = 2;
 const USERNAME_MAXLENGTH = 15;
 
-export default function RoomEntrance() {
+export interface RoomEntranceProps {
+    setIsConnected: (connected: boolean) => void;
+}
+
+export default function RoomEntrance(props: RoomEntranceProps) {
     const [username, setUsername] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
@@ -16,10 +20,12 @@ export default function RoomEntrance() {
         try {
             await hubClient.start();
             await hubClient.joinRoom(id as string, username);
+            props.setIsConnected(true);
         } catch (err: any) {
+            props.setIsConnected(false);
             setError('Failed to join room. Please try again.');
         }
-}
+    }
 
     return (
         <div
@@ -62,8 +68,9 @@ export default function RoomEntrance() {
                         />
 
                         <button
-                            onClick={handleJoinRoom}
-                            disabled={username.length <= USERNAME_MINLENGTH}
+                            onClick={() => handleJoinRoom()}
+                            onKeyDown={(e) => e.key === 'Enter' && username.length >= USERNAME_MINLENGTH && handleJoinRoom()}
+                            disabled={username.length < USERNAME_MINLENGTH}
                             className={`
                                 flex shrink-0 items-center justify-center w-12 h-12 rounded-full transition-all duration-500 border
                                 ${username.length >= USERNAME_MINLENGTH
