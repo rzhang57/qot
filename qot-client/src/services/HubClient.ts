@@ -4,6 +4,19 @@ const HUB_URL = 'http://localhost:5093/hubs/rooms';
 
 class HubClient {
     private connection: signalR.HubConnection;
+    private currentRoomCode: string | null = null;
+
+    isInRoom(roomCode: string): boolean {
+        return this.isConnected() && this.currentRoomCode === roomCode;
+    }
+
+    getCurrentRoom(): string | null {
+        return this.currentRoomCode;
+    }
+
+    isConnected(): boolean {
+        return this.connection.state === signalR.HubConnectionState.Connected;
+    }
 
     constructor() {
         this.connection = new signalR.HubConnectionBuilder()
@@ -23,6 +36,7 @@ class HubClient {
     }
 
     async joinRoom(roomCode: string, username: string) {
+        this.currentRoomCode = roomCode;
         await this.connection.invoke('JoinRoom', roomCode, username);
     }
 

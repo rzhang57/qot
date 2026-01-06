@@ -14,7 +14,7 @@ export default function RoomEntrance(props: RoomEntranceProps) {
     const [username, setUsername] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
-    const { id} = useParams();
+    const {id} = useParams();
 
     const handleJoinRoom = async () => {
         try {

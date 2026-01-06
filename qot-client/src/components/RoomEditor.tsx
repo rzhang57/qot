@@ -1,5 +1,16 @@
+import {hubClient} from "../services/HubClient.ts";
+import {useEffect} from "react";
+import {useNavigate, useParams} from "react-router-dom";
+
 export default function RoomEditor() {
-    // TODO: implement and use context for isConnected state (?) to re-direct users who are not connected to the room back to the entrance page if not already connected
+    const navigate = useNavigate();
+    const {id} = useParams();
+
+    useEffect(() => {
+        if (!hubClient.isInRoom(id as string)) {
+            navigate(`/rooms/${id}`);
+        }
+    }, [id]);
 
     return (
         <div>Room Editor Component</div>
