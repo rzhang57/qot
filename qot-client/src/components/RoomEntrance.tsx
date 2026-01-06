@@ -1,7 +1,8 @@
 import {AmbientBackground, glassBase, glassInactive, glassIridescent} from "./Landing.tsx";
 import {useNavigate, useParams} from "react-router-dom";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {hubClient} from "../services/HubClient.ts";
+import {RoomsClient} from "../services/RoomsClient.ts";
 
 const USERNAME_MINLENGTH = 2;
 const USERNAME_MAXLENGTH = 15;
@@ -15,6 +16,12 @@ export default function RoomEntrance(props: RoomEntranceProps) {
     const [error, setError] = useState('');
     const navigate = useNavigate();
     const {id} = useParams();
+
+    useEffect( () => {
+        RoomsClient.findRoom(id as string).catch(() => {
+            navigate('/');
+        });
+    }, [id]);
 
     const handleJoinRoom = async () => {
         try {
