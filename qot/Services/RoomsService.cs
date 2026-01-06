@@ -35,17 +35,24 @@ namespace qot.Services
 
             Room room = GetRoom(request.RoomCode);
 
-            if (room.Users.Count >= room.MaxCapacity)
+            lock (room)
             {
-                throw new InvalidOperationException($"Room '{request.RoomCode}' is full.");
-            }
-            if (room.Users.Any(p => p.Value.Alias.Equals(request.Username, StringComparison.OrdinalIgnoreCase) && !p.Key.Equals(connectionId)))
-            {
-                throw new InvalidOperationException($"Username '{request.Username}' is already taken in Room '{request.RoomCode}'.");
-            }
+                if (!room.Users.ContainsKey(connectionId))
+                {
+                    if (room.Users.Count >= room.MaxCapacity)
+                    {
+                        throw new InvalidOperationException($"Room '{request.RoomCode}' is full.");
+                    }
 
-            room.Users.AddOrUpdate(connectionId, _ => new User() { Alias = request.Username }, (_, __) => new User() { Alias = request.Username });
-            _connectionToRoom[connectionId] = request.RoomCode;
+                    if (room.Users.Any(p => p.Value.Alias.Equals(request.Username, StringComparison.OrdinalIgnoreCase)))
+                    {
+                        throw new InvalidOperationException($"Username '{request.Username}' is already taken in Room '{request.RoomCode}'.");
+                    }
+                }
+
+                room.Users.AddOrUpdate(connectionId, _ => new User() { Alias = request.Username }, (_, __) => new User() { Alias = request.Username });
+                _connectionToRoom[connectionId] = request.RoomCode;
+            }
 
             return room;
         }
