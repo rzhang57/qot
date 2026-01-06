@@ -26,6 +26,10 @@ class HubClient {
         await this.connection.invoke('JoinRoom', roomCode, username);
     }
 
+    async sendMarkdownUpdate(roomCode: string, markdownContent: string) {
+        await this.connection.invoke('UpdateMarkdown', roomCode, markdownContent);
+    }
+
     onUserJoined(callback: (username: string, userCount: number) => void) {
         this.connection.on('UserJoined', callback);
     }
