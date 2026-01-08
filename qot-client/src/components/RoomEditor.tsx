@@ -3,6 +3,7 @@ import { useEffect, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
+import {RoomsClient} from "../services/RoomsClient.ts";
 
 export default function RoomEditor() {
     const navigate = useNavigate();
@@ -11,7 +12,6 @@ export default function RoomEditor() {
 
     const editor = useEditor({
         extensions: [StarterKit],
-        content: '<p>Start typing...</p>',
         editorProps: {
             attributes: {
                 class: 'prose prose-sm sm:prose-base focus:outline-none min-h-screen p-8',
@@ -26,14 +26,31 @@ export default function RoomEditor() {
         },
     });
 
-    // Verify user is in room
     useEffect(() => {
         if (!HubsClient.isInRoom(id as string)) {
             navigate(`/rooms/${id}`);
         }
     }, [id, navigate]);
 
-    // Listen for updates from other users
+    useEffect(() => {
+        const loadRoom = async () => {
+            try {
+                const room = await RoomsClient.findRoom(id as string);
+                if (editor) {
+                    editor.commands.setContent(room.markdownContent || '<p>Start typing...</p>', {
+                        emitUpdate: false
+                    });
+                }
+            } catch (err) {
+                console.error('Failed to load room:', err);
+            }
+        };
+
+        if (editor) {
+            loadRoom();
+        }
+    }, [editor, id]);
+
     useEffect(() => {
         HubsClient.onMarkdownUpdated((updatedContent: string) => {
             if (editor && editor.getHTML() !== updatedContent) {
@@ -48,8 +65,10 @@ export default function RoomEditor() {
     }
 
     return (
-        <div className="min-h-screen bg-[#FAFAFA]">
-            <EditorContent editor={editor} />
+        <div className="min-h-screen bg-[#FAFAFA] flex justify-center">
+            <div className="w-full max-w-3xl p-8">
+                <EditorContent editor={editor}/>
+            </div>
         </div>
     );
 }
