@@ -4,6 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import {RoomsClient} from "../services/RoomsClient.ts";
+import Placeholder from '@tiptap/extension-placeholder';
 
 export default function RoomEditor() {
     const navigate = useNavigate();
@@ -11,7 +12,10 @@ export default function RoomEditor() {
     const isRemoteUpdate = useRef(false);
 
     const editor = useEditor({
-        extensions: [StarterKit],
+        extensions: [StarterKit,
+            Placeholder.configure({
+                placeholder: 'Type anything here...',
+            }),],
         editorProps: {
             attributes: {
                 class: 'prose prose-sm sm:prose-base focus:outline-none min-h-screen p-8',
@@ -37,9 +41,7 @@ export default function RoomEditor() {
             try {
                 const room = await RoomsClient.findRoom(id as string);
                 if (editor) {
-                    editor.commands.setContent(room.markdownContent || '<p>Start typing...</p>', {
-                        emitUpdate: false
-                    });
+                    editor.commands.setContent(room.markdownContent);
                 }
             } catch (err) {
                 console.error('Failed to load room:', err);
