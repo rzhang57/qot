@@ -1,6 +1,6 @@
 import * as signalR from '@microsoft/signalr';
 
-const HUB_URL = 'http://localhost:5093/hubs/rooms';
+const HUB_URL = import.meta.env.VITE_HUB_URL || 'http://localhost:5093/hubs/rooms';
 
 class HubClient {
     private connection: signalR.HubConnection;

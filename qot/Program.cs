@@ -3,8 +3,12 @@ using qot.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenAnyIP(5093);
+});
 
+// Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddSingleton<RoomsService>();
 builder.Services.AddHostedService<RoomCleanUpService>();
@@ -15,7 +19,7 @@ builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy.WithOrigins("http://localhost:3000", "http://localhost:5173", "http://localhost:5174", "null") // Vite/React dev servers
+        policy.WithOrigins("http://localhost:3000", "http://localhost:5173", "http://localhost:5174", "null", "http://192.168.1.70:5173") // Vite/React dev servers
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials(); // Required for SignalR

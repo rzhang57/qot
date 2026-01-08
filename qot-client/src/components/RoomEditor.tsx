@@ -1,10 +1,11 @@
 import { HubsClient } from "../services/HubsClient.ts";
-import { useEffect, useRef } from "react";
+import {useEffect, useMemo, useRef} from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import {RoomsClient} from "../services/RoomsClient.ts";
 import Placeholder from '@tiptap/extension-placeholder';
+import {throttle} from "lodash";
 
 export default function RoomEditor() {
     const navigate = useNavigate();
@@ -23,12 +24,18 @@ export default function RoomEditor() {
         },
         onUpdate: ({ editor }) => {
             if (!isRemoteUpdate.current) {
-                const markdown = editor.getHTML();
-                HubsClient.sendMarkdownUpdate(id as string, markdown);
+                throttledUpdate(editor.getHTML());
             }
             isRemoteUpdate.current = false;
         },
     });
+
+    const throttledUpdate = useMemo(
+        () => throttle((content: string) => {
+            HubsClient.sendMarkdownUpdate(id as string, content);
+        }, 500),
+        [id]
+    );
 
     useEffect(() => {
         if (!HubsClient.isInRoom(id as string)) {
