@@ -41,7 +41,7 @@ class HubClient {
     }
 
     async sendMarkdownUpdate(roomCode: string, markdownContent: string) {
-        await this.connection.invoke('UpdateMarkdown', roomCode, markdownContent);
+        await this.connection.invoke('SendMarkdownUpdate', roomCode, markdownContent);
     }
 
     onUserJoined(callback: (username: string, userCount: number) => void) {
@@ -57,4 +57,4 @@ class HubClient {
     }
 }
 
-export const hubClient = new HubClient();
+export const HubsClient = new HubClient();

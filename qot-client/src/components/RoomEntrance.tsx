@@ -1,7 +1,7 @@
 import {AmbientBackground, glassBase, glassInactive, glassIridescent} from "./Landing.tsx";
 import {useNavigate, useParams} from "react-router-dom";
 import {useEffect, useState} from "react";
-import {hubClient} from "../services/HubClient.ts";
+import {HubsClient} from "../services/HubsClient.ts";
 import {RoomsClient} from "../services/RoomsClient.ts";
 
 const USERNAME_MINLENGTH = 2;
@@ -25,8 +25,8 @@ export default function RoomEntrance(props: RoomEntranceProps) {
 
     const handleJoinRoom = async () => {
         try {
-            await hubClient.start();
-            await hubClient.joinRoom(id as string, username);
+            await HubsClient.start();
+            await HubsClient.joinRoom(id as string, username);
             props.setIsConnected(true);
         } catch (err: any) {
             props.setIsConnected(false);
